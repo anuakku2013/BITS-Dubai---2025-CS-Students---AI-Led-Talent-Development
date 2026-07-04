@@ -145,5 +145,7 @@ class CareerViewModel(application: Application) : AndroidViewModel(application) 
                 }
             }
         }
+        // Fetch AI Feeds on launch
+        refreshAIFeeds()
     }
 }
