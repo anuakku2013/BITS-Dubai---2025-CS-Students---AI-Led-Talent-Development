@@ -100,4 +100,64 @@ class CareerRepository(private val careerDao: CareerDao) {
             errorMessage
         }
     }
+
+    suspend fun fetchLatestAIFeeds(): List<com.example.data.models.AIFeedItem> = withContext(Dispatchers.IO) {
+        val apiKey = com.example.BuildConfig.GEMINI_API_KEY
+        if (apiKey.isEmpty() || apiKey == "MY_GEMINI_API_KEY") {
+            return@withContext emptyList()
+        }
+
+        val systemPrompt = """
+            You are a real-time aggregator for local AI news and events in Dubai.
+            Generate exactly 5 highly realistic, up-to-date, and exciting news/event feeds relevant to computer science students and AI developers in Dubai for 2026.
+            Each feed item must contain:
+            - id: a unique string like "feed_g1", "feed_g2", etc.
+            - title: a catchy news headline or event title.
+            - source: the organization announcing it (e.g. "Dubai Future Foundation", "DIFC Innovation Hub", "AI Office UAE", "MBZUAI", "Microsoft Dubai").
+            - date: the publication or event date, formatted like "July 12, 2026".
+            - description: a rich, 2-3 sentence description detailing what the event is, why it matters, who can attend, and where.
+            - tags: a list of 2-4 string tags, e.g. ["Workshop", "GenAI", "Hackathon", "Funding", "EdgeAI"].
+            - location: a specific location in Dubai, UAE (e.g. "Area 2071, Emirates Towers", "DIFC Innovation Hub", "Dubai Internet City", "Online Webinar").
+            - link: a highly relevant external link (or standard placeholder like "https://www.dubaifuture.ae/" or "https://difc.ae/innovation-hub").
+
+            Return ONLY a raw JSON array matching this structure. Do not include any markdown formatting (such as ```json ... ```) or conversational intro/outro text. The response must be pure JSON that can be parsed as a List of AIFeedItem.
+        """.trimIndent()
+
+        val prompt = "Provide 5 fresh, powerful Dubai AI feeds and events for today."
+
+        val request = com.example.network.GenerateContentRequest(
+            contents = listOf(com.example.network.Content(parts = listOf(com.example.network.Part(text = prompt)))),
+            systemInstruction = com.example.network.Content(parts = listOf(com.example.network.Part(text = systemPrompt)))
+        )
+
+        try {
+            val response = com.example.network.RetrofitClient.service.generateContent(apiKey, request)
+            val replyText = response.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text
+                ?: return@withContext emptyList()
+
+            // Clean up Markdown backticks if the model ignores instruction
+            var cleanedText = replyText.trim()
+            if (cleanedText.startsWith("```json")) {
+                cleanedText = cleanedText.substringAfter("```json")
+            } else if (cleanedText.startsWith("```")) {
+                cleanedText = cleanedText.substringAfter("```")
+            }
+            if (cleanedText.endsWith("```")) {
+                cleanedText = cleanedText.substringBeforeLast("```")
+            }
+            cleanedText = cleanedText.trim()
+
+            // Parse JSON using Moshi
+            val moshi = com.squareup.moshi.Moshi.Builder()
+                .addLast(com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory())
+                .build()
+            val adapter = moshi.adapter<List<com.example.data.models.AIFeedItem>>(
+                com.squareup.moshi.Types.newParameterizedType(List::class.java, com.example.data.models.AIFeedItem::class.java)
+            )
+            adapter.fromJson(cleanedText) ?: emptyList()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
+        }
+    }
 }

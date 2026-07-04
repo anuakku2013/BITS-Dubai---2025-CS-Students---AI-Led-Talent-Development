@@ -60,6 +60,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.models.CareerData
+import com.example.data.models.openLink
 import com.example.ui.theme.*
 import com.example.ui.viewmodel.CareerViewModel
 
@@ -69,8 +70,10 @@ fun EventsScreen(viewModel: CareerViewModel) {
     val bookmarks by viewModel.bookmarks.collectAsState()
     val progress by viewModel.courseProgress.collectAsState()
     val query by viewModel.searchQuery.collectAsState()
+    val aiFeeds by viewModel.aiFeeds.collectAsState()
+    val isRefreshingFeeds by viewModel.isRefreshingFeeds.collectAsState()
 
-    var activeSubTab by remember { mutableStateOf("events") } // "events" or "internships"
+    var activeSubTab by remember { mutableStateOf("events") } // "events", "internships", or "feeds"
 
     val filteredEvents = CareerData.events.filter {
         it.title.contains(query, ignoreCase = true) ||
@@ -84,6 +87,14 @@ fun EventsScreen(viewModel: CareerViewModel) {
         it.company.contains(query, ignoreCase = true) ||
         it.description.contains(query, ignoreCase = true) ||
         it.requirements.any { req -> req.contains(query, ignoreCase = true) }
+    }
+
+    val filteredFeeds = aiFeeds.filter {
+        it.title.contains(query, ignoreCase = true) ||
+        it.source.contains(query, ignoreCase = true) ||
+        it.description.contains(query, ignoreCase = true) ||
+        it.location.contains(query, ignoreCase = true) ||
+        it.tags.any { tag -> tag.contains(query, ignoreCase = true) }
     }
 
     LazyColumn(
@@ -132,7 +143,7 @@ fun EventsScreen(viewModel: CareerViewModel) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 // Dubai AI Events Pill
                 Box(
@@ -153,12 +164,12 @@ fun EventsScreen(viewModel: CareerViewModel) {
                             imageVector = Icons.Default.CalendarMonth,
                             contentDescription = "Events Icon",
                             tint = if (activeSubTab == "events") Color.White else TextSecondary,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(14.dp)
                         )
-                        Spacer(modifier = Modifier.width(6.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = "Dubai AI Events",
-                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                            text = "Events",
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                             color = if (activeSubTab == "events") Color.White else GeoPrimaryDark
                         )
                     }
@@ -183,13 +194,43 @@ fun EventsScreen(viewModel: CareerViewModel) {
                             imageVector = Icons.Default.Work,
                             contentDescription = "Internships Icon",
                             tint = if (activeSubTab == "internships") Color.White else TextSecondary,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(14.dp)
                         )
-                        Spacer(modifier = Modifier.width(6.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = "AI Internships",
-                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                            text = "Internships",
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                             color = if (activeSubTab == "internships") Color.White else GeoPrimaryDark
+                        )
+                    }
+                }
+
+                // AI Feeds Pill
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(if (activeSubTab == "feeds") GeoPrimaryDark else Color.White)
+                        .then(
+                            if (activeSubTab != "feeds") Modifier.background(Color.White).border(1.dp, GeoBorder, RoundedCornerShape(16.dp))
+                            else Modifier
+                        )
+                        .clickable { activeSubTab = "feeds" }
+                        .padding(vertical = 12.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Info,
+                            contentDescription = "Feeds Icon",
+                            tint = if (activeSubTab == "feeds") Color.White else TextSecondary,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "AI Feeds",
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                            color = if (activeSubTab == "feeds") Color.White else GeoPrimaryDark
                         )
                     }
                 }
@@ -338,8 +379,7 @@ fun EventsScreen(viewModel: CareerViewModel) {
                                 Spacer(modifier = Modifier.height(12.dp))
                                 Button(
                                     onClick = {
-                                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(event.externalLink))
-                                        context.startActivity(intent)
+                                        openLink(context, event.externalLink)
                                     },
                                     modifier = Modifier.fillMaxWidth(),
                                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
@@ -351,6 +391,201 @@ fun EventsScreen(viewModel: CareerViewModel) {
                                     ) {
                                         Text("Register & Event Info", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = AIBluePrimary)
                                         Icon(imageVector = Icons.Default.Launch, contentDescription = "Launch", tint = AIBluePrimary, modifier = Modifier.size(14.dp))
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } else if (activeSubTab == "feeds") {
+            item {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = "Live Dubai AI Feed Generator",
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                            color = TextPrimary
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(
+                            text = "Connect directly with our server-side Gemini 3.5 Flash model. It will curate and synthesize real-time local Dubai AI events, seminars, and hot tech announcements specifically for CS students.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = TextSecondary
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Button(
+                            onClick = { viewModel.refreshAIFeeds() },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(containerColor = AIBluePrimary),
+                            enabled = !isRefreshingFeeds,
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            if (isRefreshingFeeds) {
+                                Text(
+                                    text = "Synthesizing AI Event Feeds...",
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = Color.Black
+                                )
+                            } else {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.CheckCircle,
+                                        contentDescription = "Sync",
+                                        tint = Color.Black,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Text(
+                                        text = "Refresh Live AI Feeds",
+                                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                        color = Color.Black
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (filteredFeeds.isEmpty()) {
+                item {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(48.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Info,
+                            contentDescription = "Empty",
+                            tint = TextSecondary,
+                            modifier = Modifier.size(48.dp)
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = "No feeds found matching '$query'",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TextSecondary
+                        )
+                    }
+                }
+            } else {
+                items(filteredFeeds) { feed ->
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            // Header row with source and date
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = feed.source,
+                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                    color = AIBlueSecondary
+                                )
+                                Text(
+                                    text = feed.date,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = TextSecondary
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = feed.title,
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                color = TextPrimary
+                            )
+
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                text = feed.description,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = TextSecondary
+                            )
+
+                            // Location section
+                            if (feed.location.isNotEmpty()) {
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.LocationOn,
+                                        contentDescription = "Location",
+                                        tint = TextSecondary,
+                                        modifier = Modifier.size(12.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = feed.location,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = TextSecondary
+                                    )
+                                }
+                            }
+
+                            // Tags Section
+                            if (feed.tags.isNotEmpty()) {
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    feed.tags.take(3).forEach { tag ->
+                                        Box(
+                                            modifier = Modifier
+                                                .clip(RoundedCornerShape(4.dp))
+                                                .background(NeonPurple.copy(alpha = 0.15f))
+                                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                                        ) {
+                                            Text(
+                                                text = tag,
+                                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                                                color = NeonPurple
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Link Button
+                            if (feed.link.isNotEmpty()) {
+                                Spacer(modifier = Modifier.height(12.dp))
+                                Button(
+                                    onClick = { openLink(context, feed.link) },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                                    shape = RoundedCornerShape(8.dp)
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    ) {
+                                        Text(
+                                            text = "View Feed details",
+                                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                            color = AIBluePrimary
+                                        )
+                                        Icon(
+                                            imageVector = Icons.Default.Launch,
+                                            contentDescription = "Launch",
+                                            tint = AIBluePrimary,
+                                            modifier = Modifier.size(14.dp)
+                                        )
                                     }
                                 }
                             }
@@ -533,8 +768,7 @@ fun EventsScreen(viewModel: CareerViewModel) {
                             Spacer(modifier = Modifier.height(12.dp))
                             Button(
                                 onClick = {
-                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(internship.applyLink))
-                                    context.startActivity(intent)
+                                    openLink(context, internship.applyLink)
                                 },
                                 modifier = Modifier.fillMaxWidth(),
                                 colors = ButtonDefaults.buttonColors(containerColor = AIBluePrimary),

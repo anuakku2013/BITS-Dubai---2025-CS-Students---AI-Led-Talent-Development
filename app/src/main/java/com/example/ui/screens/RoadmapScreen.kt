@@ -52,6 +52,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.models.CareerData
+import com.example.data.models.openLink
 import com.example.ui.theme.*
 import com.example.ui.viewmodel.CareerViewModel
 
@@ -310,8 +311,7 @@ fun RoadmapScreen(viewModel: CareerViewModel) {
 
                             Button(
                                 onClick = {
-                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(course.link))
-                                    context.startActivity(intent)
+                                    openLink(context, course.link)
                                 },
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = MaterialTheme.colorScheme.surfaceVariant,

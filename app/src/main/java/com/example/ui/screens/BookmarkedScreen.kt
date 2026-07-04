@@ -47,6 +47,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.data.models.CareerData
+import com.example.data.models.openLink
 import com.example.ui.theme.*
 import com.example.ui.viewmodel.CareerViewModel
 
@@ -211,8 +212,7 @@ fun BookmarkedBottomSheetContent(viewModel: CareerViewModel, onDismiss: () -> Un
                             if (link.isNotEmpty()) {
                                 Button(
                                     onClick = {
-                                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
-                                        context.startActivity(intent)
+                                    openLink(context, link)
                                     },
                                     modifier = Modifier.fillMaxWidth(),
                                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),

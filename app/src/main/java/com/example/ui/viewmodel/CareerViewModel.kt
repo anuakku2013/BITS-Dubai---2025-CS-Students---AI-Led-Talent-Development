@@ -46,6 +46,30 @@ class CareerViewModel(application: Application) : AndroidViewModel(application) 
     private val _selectedPathId = MutableStateFlow<String?>("path_gen_ai") // default to Gen AI
     val selectedPathId: StateFlow<String?> = _selectedPathId.asStateFlow()
 
+    // Feeds state
+    private val _aiFeeds = MutableStateFlow<List<com.example.data.models.AIFeedItem>>(com.example.data.models.CareerData.defaultFeeds)
+    val aiFeeds: StateFlow<List<com.example.data.models.AIFeedItem>> = _aiFeeds.asStateFlow()
+
+    private val _isRefreshingFeeds = MutableStateFlow(false)
+    val isRefreshingFeeds: StateFlow<Boolean> = _isRefreshingFeeds.asStateFlow()
+
+    fun refreshAIFeeds() {
+        if (_isRefreshingFeeds.value) return
+        viewModelScope.launch {
+            _isRefreshingFeeds.value = true
+            try {
+                val generated = repository.fetchLatestAIFeeds()
+                if (generated.isNotEmpty()) {
+                    _aiFeeds.value = generated
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                _isRefreshingFeeds.value = false
+            }
+        }
+    }
+
     // Loading states
     private val _isGeneratingReply = MutableStateFlow(false)
     val isGeneratingReply: StateFlow<Boolean> = _isGeneratingReply.asStateFlow()

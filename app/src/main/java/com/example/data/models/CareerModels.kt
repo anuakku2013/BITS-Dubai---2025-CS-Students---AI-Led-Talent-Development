@@ -6,6 +6,19 @@ import androidx.compose.material.icons.filled.CloudQueue
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.squareup.moshi.JsonClass
+
+@JsonClass(generateAdapter = true)
+data class AIFeedItem(
+    val id: String,
+    val title: String,
+    val source: String,
+    val date: String,
+    val description: String,
+    val tags: List<String> = emptyList(),
+    val location: String = "Dubai, UAE",
+    val link: String = "https://www.dubaifuture.ae/"
+)
 
 data class AIEvent(
     val id: String,
@@ -394,4 +407,75 @@ object CareerData {
             finalProjectSuggestion = "Train and evaluate a custom vision model that identifies smart Dubai traffic congestion using real-time camera feeds, deployed with an active API gateway."
         )
     )
+
+    val defaultFeeds = listOf(
+        AIFeedItem(
+            id = "feed_1",
+            title = "Dubai Future Foundation Announces 'Dubai AI Campus' Expansion",
+            source = "Dubai Future Foundation (DFF)",
+            date = "July 02, 2026",
+            description = "The Dubai AI Campus at Area 2071 is expanding to accommodate over 500 global AI startups. The expansion includes dedicated hardware labs for university student research, free high-performance GPU clusters, and custom co-working zones for tech founders.",
+            tags = listOf("Dubai AI Campus", "DFF", "Startups", "GPU Access"),
+            location = "Area 2071, Emirates Towers, Dubai",
+            link = "https://www.dubaifuture.ae/"
+        ),
+        AIFeedItem(
+            id = "feed_2",
+            title = "DIFC Innovation Hub Unveils AI & Web3 Venture Fund worth AED 100M",
+            source = "DIFC Innovation Hub",
+            date = "June 28, 2026",
+            description = "A new venture fund of AED 100M is dedicated to accelerating early-stage AI startups and student-led deep tech prototypes in the GCC. Grants of up to AED 50,000 are available for university graduation projects incorporating unique AI models.",
+            tags = listOf("Funding", "DIFC", "Student Grants", "Innovation"),
+            location = "DIFC, Dubai",
+            link = "https://difc.ae/innovation-hub"
+        ),
+        AIFeedItem(
+            id = "feed_3",
+            title = "MBZUAI and IBM Launch Joint Center of Excellence in Generative AI",
+            source = "Mohamed bin Zayed University of Artificial Intelligence",
+            date = "June 15, 2026",
+            description = "The Mohamed bin Zayed University of Artificial Intelligence (MBZUAI) has partnered with IBM to launch a joint AI Research Lab focused on developing Arabic LLMs, carbon-efficient transformer architectures, and vision systems for autonomous transportation in the UAE.",
+            tags = listOf("Research", "Partnership", "Arabic LLMs", "IBM"),
+            location = "MBZUAI Campus, Abu Dhabi / Dubai Office",
+            link = "https://mbzuai.ac.ae/"
+        ),
+        AIFeedItem(
+            id = "feed_4",
+            title = "Dubai Chambers Holds Seminar on 'AI for Retail & Smart Commerce'",
+            source = "Dubai Chambers",
+            date = "June 10, 2026",
+            description = "An interactive workshop detailing how local businesses are utilizing predictive analytics, retail computer vision, and dynamic price models. A special segment is dedicated to CS students presenting retail tech projects.",
+            tags = listOf("Seminar", "Retail Tech", "Networking"),
+            location = "Dubai Chambers HQ, Deira, Dubai",
+            link = "https://www.dubaichamber.com"
+        ),
+        AIFeedItem(
+            id = "feed_5",
+            title = "TII Falcon 3.0 Open-Source Foundation Models Released",
+            source = "Technology Innovation Institute (TII)",
+            date = "May 24, 2026",
+            description = "The UAE's Technology Innovation Institute has officially released Falcon 3.0, a lightweight, highly efficient model optimized for edge devices and mobile compilation. It outperforms previous models in multi-lingual reasoning and Arabic dialect comprehension.",
+            tags = listOf("Falcon LLM", "TII", "Open Source", "Edge AI"),
+            location = "Masdar City, Abu Dhabi / Online",
+            link = "https://www.tii.ae"
+        )
+    )
 }
+
+fun openLink(context: android.content.Context, url: String) {
+    try {
+        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url))
+        intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
+    } catch (e: Exception) {
+        try {
+            val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+            val clip = android.content.ClipData.newPlainText("AI Hub Link", url)
+            clipboard.setPrimaryClip(clip)
+            android.widget.Toast.makeText(context, "No browser found. Link copied to clipboard!", android.widget.Toast.LENGTH_LONG).show()
+        } catch (clipEx: Exception) {
+            android.widget.Toast.makeText(context, "Could not open or copy link: $url", android.widget.Toast.LENGTH_LONG).show()
+        }
+    }
+}
+
