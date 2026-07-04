@@ -20,6 +20,20 @@ class CareerRepository(private val careerDao: CareerDao) {
     val bookmarks: Flow<List<BookmarkEntity>> = careerDao.getAllBookmarks()
     val courseProgress: Flow<List<CourseProgressEntity>> = careerDao.getAllCourseProgress()
     val chatHistory: Flow<List<ChatMessageEntity>> = careerDao.getChatMessages()
+    val subscriptionFlow: Flow<com.example.data.local.SubscriptionEntity?> = careerDao.getSubscriptionFlow()
+
+    // Subscription operations
+    suspend fun saveSubscription(subscription: com.example.data.local.SubscriptionEntity) {
+        withContext(Dispatchers.IO) {
+            careerDao.insertSubscription(subscription)
+        }
+    }
+
+    suspend fun removeSubscription() {
+        withContext(Dispatchers.IO) {
+            careerDao.deleteSubscription()
+        }
+    }
 
     // Bookmark operations
     suspend fun toggleBookmark(itemId: String, category: String, isCurrentlyBookmarked: Boolean) {

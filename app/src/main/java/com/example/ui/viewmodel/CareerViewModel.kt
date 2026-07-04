@@ -38,6 +38,40 @@ class CareerViewModel(application: Application) : AndroidViewModel(application) 
     val chatHistory: StateFlow<List<ChatMessageEntity>> = repository.chatHistory
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    val subscription: StateFlow<com.example.data.local.SubscriptionEntity?> = repository.subscriptionFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
+    fun saveSubscription(
+        email: String,
+        enableEmail: Boolean,
+        enableBrowser: Boolean,
+        prefGenAI: Boolean = true,
+        prefRobotics: Boolean = true,
+        prefWorkshops: Boolean = true,
+        prefFunding: Boolean = true
+    ) {
+        viewModelScope.launch {
+            repository.saveSubscription(
+                com.example.data.local.SubscriptionEntity(
+                    email = email,
+                    enableEmail = enableEmail,
+                    enableBrowser = enableBrowser,
+                    prefGenAI = prefGenAI,
+                    prefRobotics = prefRobotics,
+                    prefWorkshops = prefWorkshops,
+                    prefFunding = prefFunding,
+                    isSubscribed = true
+                )
+            )
+        }
+    }
+
+    fun removeSubscription() {
+        viewModelScope.launch {
+            repository.removeSubscription()
+        }
+    }
+
     // Active Tab Navigation
     private val _activeTab = MutableStateFlow(0) // 0: Dashboard, 1: Roadmap, 2: Events & Interns, 3: Jobs & Skills, 4: AI Advisor
     val activeTab: StateFlow<Int> = _activeTab.asStateFlow()

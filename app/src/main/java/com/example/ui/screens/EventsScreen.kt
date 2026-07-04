@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Work
+import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -234,6 +235,89 @@ fun EventsScreen(viewModel: CareerViewModel) {
                         )
                     }
                 }
+            }
+        }
+
+        // 2.5 Dubai AI Event Subscription Banner
+        item {
+            val subscription by viewModel.subscription.collectAsState()
+            var showSubDialog by remember { mutableStateOf(false) }
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .testTag("events_subscription_banner"),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = GeoSurfaceVariant),
+                border = androidx.compose.foundation.BorderStroke(1.dp, GeoBorder.copy(alpha = 0.5f))
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(44.dp)
+                            .clip(CircleShape)
+                            .background(if (subscription?.isSubscribed == true) GeoProgressBg else GeoEventBg),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.NotificationsActive,
+                            contentDescription = "Alerts Icon",
+                            tint = if (subscription?.isSubscribed == true) GeoProgressIndicator else GeoPrimaryDark,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+                    
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = if (subscription?.isSubscribed == true) "Dubai AI Alerts Active" else "Subscribe to Dubai AI Alerts",
+                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                            color = GeoPrimaryDark
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = if (subscription?.isSubscribed == true) 
+                                "Curating live events & jobs for ${subscription?.email}"
+                            else 
+                                "Get browser or email updates for upcoming events, seminars, & hackathons.",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = TextSecondary,
+                            lineHeight = 14.sp
+                        )
+                    }
+
+                    Button(
+                        onClick = { showSubDialog = true },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (subscription?.isSubscribed == true) Color.White else GeoPrimaryDark,
+                            contentColor = if (subscription?.isSubscribed == true) GeoPrimaryDark else Color.White
+                        ),
+                        shape = RoundedCornerShape(10.dp),
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
+                        border = if (subscription?.isSubscribed == true) androidx.compose.foundation.BorderStroke(0.5.dp, GeoBorder) else null,
+                        modifier = Modifier.testTag("events_banner_action_button")
+                    ) {
+                        Text(
+                            text = if (subscription?.isSubscribed == true) "Preferences" else "Subscribe",
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                            fontSize = 11.sp
+                        )
+                    }
+                }
+            }
+
+            if (showSubDialog) {
+                SubscriptionDialog(
+                    viewModel = viewModel,
+                    onDismiss = { showSubDialog = false }
+                )
             }
         }
 
@@ -672,7 +756,10 @@ fun EventsScreen(viewModel: CareerViewModel) {
                             Spacer(modifier = Modifier.height(4.dp))
 
                             // Badges (Local, Remote, Hybrid)
-                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                modifier = Modifier.padding(vertical = 2.dp)
+                            ) {
                                 Box(
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(4.dp))
@@ -695,6 +782,18 @@ fun EventsScreen(viewModel: CareerViewModel) {
                                         text = internship.duration,
                                         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                                         color = NeonPurple
+                                    )
+                                }
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(4.dp))
+                                        .background(AccentOrange.copy(alpha = 0.15f))
+                                        .padding(horizontal = 8.dp, vertical = 2.dp)
+                                ) {
+                                    Text(
+                                        text = "Deadline: " + internship.deadline,
+                                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                        color = AccentOrange
                                     )
                                 }
                             }

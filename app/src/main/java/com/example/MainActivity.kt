@@ -55,6 +55,7 @@ import com.example.ui.screens.EventsScreen
 import com.example.ui.screens.JobsScreen
 import com.example.ui.screens.MentorScreen
 import com.example.ui.screens.RoadmapScreen
+import com.example.ui.screens.SubscriptionDialog
 import com.example.ui.theme.AccentOrange
 import com.example.ui.theme.AIBluePrimary
 import com.example.ui.theme.GeoBackground
@@ -99,6 +100,7 @@ fun MainAppContent() {
     val bookmarks by viewModel.bookmarks.collectAsState()
 
     var showBookmarksSheet by remember { mutableStateOf(false) }
+    var showSubscriptionDialog by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
 
@@ -154,7 +156,8 @@ fun MainAppContent() {
                             .size(36.dp)
                             .clip(CircleShape)
                             .background(GeoEventBg)
-                            .clickable { /* Profile info */ },
+                            .clickable { showSubscriptionDialog = true }
+                            .testTag("profile_avatar"),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
@@ -334,6 +337,14 @@ fun MainAppContent() {
                     }
                 )
             }
+        }
+
+        // Dialog for Event Subscription Preferences
+        if (showSubscriptionDialog) {
+            SubscriptionDialog(
+                viewModel = viewModel,
+                onDismiss = { showSubscriptionDialog = false }
+            )
         }
     }
 }

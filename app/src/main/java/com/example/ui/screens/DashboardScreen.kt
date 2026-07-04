@@ -25,8 +25,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.BusinessCenter
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Domain
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Launch
@@ -36,22 +39,30 @@ import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material.icons.filled.Work
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -68,6 +79,8 @@ fun DashboardScreen(viewModel: CareerViewModel) {
     val selectedPathId by viewModel.selectedPathId.collectAsState()
     val aiFeeds by viewModel.aiFeeds.collectAsState()
     val isRefreshingFeeds by viewModel.isRefreshingFeeds.collectAsState()
+    val subscription by viewModel.subscription.collectAsState()
+    var showSubDialog by remember { mutableStateOf(false) }
 
     val currentPath = CareerData.paths.find { it.id == selectedPathId } ?: CareerData.paths.first()
     val completedCourseCount = progress.count { it.isCompleted }
@@ -497,6 +510,12 @@ fun DashboardScreen(viewModel: CareerViewModel) {
             }
         }
 
+        // 5.2 Active AI Internships Dashboard Component
+        item {
+            DubaiInternshipsDashboardComponent(viewModel = viewModel)
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
         // 5.5 Real-Time Dubai AI Event Feed
         item {
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
@@ -505,7 +524,12 @@ fun DashboardScreen(viewModel: CareerViewModel) {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .clickable { showSubDialog = true }
+                            .testTag("dashboard_events_subscription_badge_row")
+                    ) {
                         Box(
                             modifier = Modifier
                                 .size(8.dp)
@@ -518,6 +542,23 @@ fun DashboardScreen(viewModel: CareerViewModel) {
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                             color = GeoPrimaryDark
                         )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        
+                        // Active or Subscribe Badge
+                        val isSubscribed = subscription?.isSubscribed == true
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(if (isSubscribed) GeoProgressBg else GeoEventBg.copy(alpha = 0.5f))
+                                .border(0.5.dp, if (isSubscribed) GeoProgressBorder else GeoBorder, RoundedCornerShape(8.dp))
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = if (isSubscribed) "🔔 Active" else "🔔 Subscribe",
+                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold),
+                                color = if (isSubscribed) GeoProgressText else GeoPrimaryDark
+                            )
+                        }
                     }
                     
                     if (isRefreshingFeeds) {
@@ -766,6 +807,239 @@ fun DashboardScreen(viewModel: CareerViewModel) {
         }
         item {
             Spacer(modifier = Modifier.height(20.dp))
+        }
+    }
+
+    if (showSubDialog) {
+        SubscriptionDialog(
+            viewModel = viewModel,
+            onDismiss = { showSubDialog = false }
+        )
+    }
+}
+
+@Composable
+fun DubaiInternshipsDashboardComponent(
+    viewModel: CareerViewModel,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    val bookmarks by viewModel.bookmarks.collectAsState()
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .testTag("dubai_internships_dashboard")
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(GeoInternshipBg),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Work,
+                        contentDescription = "Internship Icon",
+                        tint = GeoInternshipText,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(10.dp))
+                Column {
+                    Text(
+                        text = "Active AI Internships",
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        color = GeoPrimaryDark
+                    )
+                    Text(
+                        text = "Dubai-based opportunities with deadlines",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = TextSecondary
+                    )
+                }
+            }
+            Text(
+                text = "View All",
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                color = AIBluePrimary,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(6.dp))
+                    .clickable { viewModel.setActiveTab(2) }
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            )
+        }
+        
+        Spacer(modifier = Modifier.height(12.dp))
+
+        CareerData.internships.take(3).forEach { internship ->
+            val isBookmarked = bookmarks.any { it.itemId == internship.id }
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 6.dp)
+                    .testTag("dashboard_internship_card_${internship.id}"),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                border = androidx.compose.foundation.BorderStroke(0.5.dp, GeoBorder)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    // Title and Bookmark
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.Top
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = internship.title,
+                                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                                color = TextPrimary,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.Domain,
+                                    contentDescription = "Company",
+                                    tint = AIBluePrimary,
+                                    modifier = Modifier.size(12.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = internship.company,
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = AIBluePrimary,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        }
+
+                        IconButton(
+                            onClick = { viewModel.toggleBookmark(internship.id, "internship") },
+                            modifier = Modifier
+                                .size(32.dp)
+                                .testTag("bookmark_dashboard_intern_${internship.id}")
+                        ) {
+                            Icon(
+                                imageVector = if (isBookmarked) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
+                                contentDescription = "Bookmark",
+                                tint = if (isBookmarked) AccentOrange else TextSecondary,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Location / Type details
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        // Type Badge
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(AIBlueSecondary.copy(alpha = 0.12f))
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = internship.type,
+                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold),
+                                color = AIBlueSecondary
+                            )
+                        }
+
+                        // Duration Badge
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(NeonPurple.copy(alpha = 0.12f))
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = internship.duration,
+                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold),
+                                color = NeonPurple
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // Deadline block with visual clock/calendar element
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(GeoSurfaceVariant.copy(alpha = 0.5f))
+                            .border(0.5.dp, GeoBorder.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CalendarMonth,
+                            contentDescription = "Deadline Clock",
+                            tint = AccentOrange,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "Apply Before: ",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = TextSecondary
+                        )
+                        Text(
+                            text = internship.deadline,
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                            color = AccentOrange
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Direct Link to Apply Button
+                    Button(
+                        onClick = {
+                            com.example.data.models.openLink(context, internship.applyLink)
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(38.dp)
+                            .testTag("apply_dashboard_intern_${internship.id}"),
+                        colors = ButtonDefaults.buttonColors(containerColor = GeoPrimaryDark),
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 4.dp),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Text(
+                                text = "Apply Directly",
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                color = Color.White
+                            )
+                            Icon(
+                                imageVector = Icons.Default.Launch,
+                                contentDescription = "Apply Link",
+                                tint = Color.White,
+                                modifier = Modifier.size(14.dp)
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }

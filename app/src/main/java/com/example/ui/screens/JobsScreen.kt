@@ -40,6 +40,9 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -340,6 +343,82 @@ fun JobsScreen(viewModel: CareerViewModel) {
                 }
             }
         } else {
+            // Hot Skills Assessment Banner Card
+            item {
+                var showQuizDialog by remember { mutableStateOf(false) }
+
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .testTag("jobs_skills_quiz_banner"),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = GeoSurfaceVariant),
+                    border = BorderStroke(1.dp, GeoBorder.copy(alpha = 0.5f))
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(44.dp)
+                                .clip(CircleShape)
+                                .background(GeoEventBg),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Psychology,
+                                contentDescription = "Quiz Icon",
+                                tint = GeoPrimaryDark,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
+
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Assess Hot AI Skills",
+                                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                                color = GeoPrimaryDark
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = "Take a short interactive quiz assessing your Python, TensorFlow, and PyTorch expertise. Receive personalized roadmap guidance!",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = TextSecondary,
+                                lineHeight = 14.sp
+                            )
+                        }
+
+                        Button(
+                            onClick = { showQuizDialog = true },
+                            colors = ButtonDefaults.buttonColors(containerColor = GeoPrimaryDark),
+                            shape = RoundedCornerShape(10.dp),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                            elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
+                            modifier = Modifier.testTag("jobs_skills_banner_quiz_button")
+                        ) {
+                            Text(
+                                text = "Take Quiz",
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                fontSize = 11.sp,
+                                color = Color.White
+                            )
+                        }
+                    }
+                }
+
+                if (showQuizDialog) {
+                    HotSkillsQuizDialog(
+                        viewModel = viewModel,
+                        onDismiss = { showQuizDialog = false }
+                    )
+                }
+            }
+
             // Hot Skills list
             items(CareerData.hotSkills) { skill ->
                 Card(

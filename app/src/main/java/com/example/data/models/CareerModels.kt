@@ -44,7 +44,8 @@ data class AIInternship(
     val requirements: List<String>,
     val freeCourseLinks: List<String>,
     val applyLink: String,
-    val difficulty: String = "Intermediate"
+    val difficulty: String = "Intermediate",
+    val deadline: String = "Oct 30, 2026"
 )
 
 data class AIJob(
@@ -241,7 +242,8 @@ object CareerData {
             description = "Work alongside AI researchers to design enterprise search solutions utilizing RAG, evaluate LLM performance, and assist in client presentations.",
             requirements = listOf("Solid Python foundations", "Familiarity with LangChain/LlamaIndex", "Undergraduate in Computer Science (2nd/3rd year)"),
             freeCourseLinks = listOf("langchain_llms", "google_genai_fun"),
-            applyLink = "https://www.pwc.com/me/en/careers"
+            applyLink = "https://www.pwc.com/me/en/careers",
+            deadline = "Sep 30, 2026"
         ),
         AIInternship(
             id = "int_tii_abudhabi",
@@ -253,7 +255,8 @@ object CareerData {
             description = "Join the makers of Falcon LLM! Support fine-tuning experiments, data preprocessing for Arabic dialects, and benchmark evaluation.",
             requirements = listOf("Experience in PyTorch or Hugging Face", "Basic understanding of transformers", "Strong linear algebra & calculus basics"),
             freeCourseLinks = listOf("fast_ai_dl", "hf_nlp"),
-            applyLink = "https://www.tii.ae/careers"
+            applyLink = "https://www.tii.ae/careers",
+            deadline = "Oct 15, 2026"
         ),
         AIInternship(
             id = "int_emirates_group",
@@ -265,7 +268,8 @@ object CareerData {
             description = "Develop prototypes utilizing computer vision for ground operations optimization or chatbot agents for customer experience.",
             requirements = listOf("Java/Kotlin or Python skills", "Familiarity with REST APIs", "Good presentation & communication skills"),
             freeCourseLinks = listOf("cs50_ai", "dl_ai_everyone"),
-            applyLink = "https://www.emiratesgroupcareers.com"
+            applyLink = "https://www.emiratesgroupcareers.com",
+            deadline = "Oct 25, 2026"
         ),
         AIInternship(
             id = "int_virtual_g42",
@@ -277,7 +281,8 @@ object CareerData {
             description = "A self-paced, mentor-guided virtual experience building dataset scraping pipelines, indexing vector databases, and constructing prompt templates.",
             requirements = listOf("Python script writing", "Familiarity with GitHub", "Passion for generative AI tools"),
             freeCourseLinks = listOf("google_genai_fun", "langchain_llms"),
-            applyLink = "https://g42.ai/careers"
+            applyLink = "https://g42.ai/careers",
+            deadline = "Nov 01, 2026"
         ),
         AIInternship(
             id = "int_startup_difc",
@@ -289,7 +294,8 @@ object CareerData {
             description = "Help a seed-stage fintech startup integrate OpenAI and Claude APIs. Benchmark system prompts, craft vector embeddings, and build clean frontends.",
             requirements = listOf("JSON, REST APIs", "HTML/CSS or Mobile App basics", "Highly creative in English writing & logic testing"),
             freeCourseLinks = listOf("dl_ai_everyone", "langchain_llms"),
-            applyLink = "https://difc.ae/innovation-hub"
+            applyLink = "https://difc.ae/innovation-hub",
+            deadline = "Nov 15, 2026"
         )
     )
 

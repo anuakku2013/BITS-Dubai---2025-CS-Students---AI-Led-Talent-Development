@@ -24,3 +24,18 @@ data class ChatMessageEntity(
     val content: String,
     val timestamp: Long = System.currentTimeMillis()
 )
+
+@Entity(tableName = "event_subscription")
+data class SubscriptionEntity(
+    @PrimaryKey val id: String = "user_subscription",
+    val email: String,
+    val enableEmail: Boolean,
+    val enableBrowser: Boolean,
+    val prefGenAI: Boolean = true,
+    val prefRobotics: Boolean = true,
+    val prefWorkshops: Boolean = true,
+    val prefFunding: Boolean = true,
+    val isSubscribed: Boolean = true,
+    val subscribedAt: Long = System.currentTimeMillis()
+)
+

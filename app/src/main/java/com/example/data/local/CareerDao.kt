@@ -34,4 +34,14 @@ interface CareerDao {
 
     @Query("DELETE FROM chat_history")
     suspend fun clearChatHistory()
+
+    // Subscription Operations
+    @Query("SELECT * FROM event_subscription WHERE id = 'user_subscription' LIMIT 1")
+    fun getSubscriptionFlow(): Flow<SubscriptionEntity?>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertSubscription(subscription: SubscriptionEntity)
+
+    @Query("DELETE FROM event_subscription WHERE id = 'user_subscription'")
+    suspend fun deleteSubscription()
 }

@@ -47,6 +47,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.material.icons.filled.Psychology
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -156,6 +161,82 @@ fun RoadmapScreen(viewModel: CareerViewModel) {
                         )
                     }
                 }
+            }
+        }
+
+        // 1.5. Hot Skills Assessment Banner Card
+        item {
+            var showQuizDialog by remember { mutableStateOf(false) }
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .testTag("roadmap_quiz_banner"),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = GeoSurfaceVariant),
+                border = BorderStroke(1.dp, GeoBorder.copy(alpha = 0.5f))
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(44.dp)
+                            .clip(CircleShape)
+                            .background(GeoEventBg),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Psychology,
+                            contentDescription = "Quiz Icon",
+                            tint = GeoPrimaryDark,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Test Your AI Readiness",
+                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                            color = GeoPrimaryDark
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = "Take a 5-question quiz on Python, PyTorch & TensorFlow. Unlock AI-crafted roadmap recommendations!",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = TextSecondary,
+                            lineHeight = 14.sp
+                        )
+                    }
+
+                    Button(
+                        onClick = { showQuizDialog = true },
+                        colors = ButtonDefaults.buttonColors(containerColor = GeoPrimaryDark),
+                        shape = RoundedCornerShape(10.dp),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
+                        modifier = Modifier.testTag("roadmap_banner_quiz_button")
+                    ) {
+                        Text(
+                            text = "Start Quiz",
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                            fontSize = 11.sp,
+                            color = Color.White
+                        )
+                    }
+                }
+            }
+
+            if (showQuizDialog) {
+                HotSkillsQuizDialog(
+                    viewModel = viewModel,
+                    onDismiss = { showQuizDialog = false }
+                )
             }
         }
 
