@@ -1,0 +1,6 @@
+{
+  "name": "AI Career Hub Dubai",
+  "description": "An AI career builder and roadmap app for 2nd-year CS students in Dubai, featuring local AI events, internships, learning paths, hot skills, and an AI Career Mentor.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
